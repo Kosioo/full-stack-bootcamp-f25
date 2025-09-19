@@ -1,0 +1,28 @@
+{
+  "name": "example_project",
+  "version": "1.0.0",
+  "description": "None",
+  "main": "tester.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kosioo/full-stack-bootcamp-f25.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Kosioo/full-stack-bootcamp-f25/issues"
+  },
+  "homepage": "https://github.com/Kosioo/full-stack-bootcamp-f25#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.5.0"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10"
+  }
+}
