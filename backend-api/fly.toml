@@ -9,7 +9,7 @@ primary_region = 'bos'
 [build]
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8888
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -20,3 +20,4 @@ primary_region = 'bos'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+

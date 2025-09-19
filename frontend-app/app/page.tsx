@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './page.module.css';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://backend-api-summer-log-9036.fly.dev";
 
 interface Note {
   id: string;
@@ -24,7 +25,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axios.get<Note[]>('http://localhost:8888/api/notes');
+        const response = await axios.get<Note[]>(`${API_URL}/api/notes`);
         setNotes(response.data);
       } catch (err) {
         setError('Failed to fetch notes. Is the backend server running?');
@@ -47,7 +48,7 @@ export default function HomePage() {
 
   if (activeNote) {
     try {
-      await axios.put(`http://localhost:8888/api/notes/${activeNote.id}`, {
+      await axios.put(`${API_URL}/api/notes/${activeNote.id}`, {
         Title: newNote.Title,
         Content: newNote.Content,
         Author: newNote.Author,
@@ -67,7 +68,7 @@ export default function HomePage() {
 
   } else {
     try {
-      const response = await axios.post<Note>('http://localhost:8888/api/notes', {
+      const response = await axios.post<Note>(`${API_URL}/api/notes`, {
         ...newNote,
         isAllCaps: false,
       });
@@ -84,7 +85,7 @@ export default function HomePage() {
 
   const handleDeleteNote = async (noteId: string) => {
   try {
-    await axios.delete(`http://localhost:8888/api/notes/${noteId}`);
+    await axios.delete(`${API_URL}/api/notes/${noteId}`);
     setNotes(notes.filter(note => note.id !== noteId));
   } catch (err) {
     console.error('Failed to delete note:', err);
@@ -106,7 +107,7 @@ const handleUpdateNote = async (noteId: string) => {
   if (!newColor) return;
 
   try {
-    await axios.put(`http://localhost:8888/api/notes/${noteId}`, { color: newColor });
+    await axios.put(`${API_URL}/api/notes/${noteId}`, { color: newColor });
     setNotes(notes.map(note =>
       note.id === noteId ? { ...note, color: newColor } : note
     ));

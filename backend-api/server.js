@@ -3,36 +3,40 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 
 const app = express();
-const port = 8888;
+const port = process.env.PORT || 8888;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://frontend-app-weathered-leaf-9842.fly.dev'
+}));
+
+let serviceAccount;
 
 try {
-  const serviceAccount = require('./serviceAccountKey.json');
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(
+      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('utf-8')
+    );
+  } else {
+    serviceAccount = require('./serviceAccountKey.json');
+  }
 
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
   });
-  console.log('Firebase works!');
 
+  console.log('Firebase works!');
 } catch (error) {
   console.error('Failed to initialize Firebase Admin SDK.', error);
-  process.exit(1); 
+  process.exit(1);
 }
 
 const db = admin.firestore();
 
 app.get('/api/notes', async (req, res) => {
   try {
-    const notesRef = db.collection('notes');
-    const snapshot = await notesRef.get();
-    
-    const notes = [];
-    snapshot.forEach(doc => {
-      notes.push({ id: doc.id, ...doc.data() });
-    });
-    
+    const snapshot = await db.collection('notes').get();
+    const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.status(200).json(notes);
   } catch (error) {
     console.error('Error fetching notes:', error);
@@ -43,16 +47,8 @@ app.get('/api/notes', async (req, res) => {
 app.post('/api/notes', async (req, res) => {
   try {
     const { Title, Content, Author, isAllCaps } = req.body;
-    
-    const newNote = {
-      Title,
-      Content,
-      Author: Author || 'Unknown',
-      isAllCaps: isAllCaps || false
-    };
-
+    const newNote = { Title, Content, Author: Author || 'Unknown', isAllCaps: isAllCaps || false };
     const docRef = await db.collection('notes').add(newNote);
-    
     res.status(201).json({ id: docRef.id, ...newNote });
   } catch (error) {
     console.error('Error adding note:', error);
@@ -63,16 +59,8 @@ app.post('/api/notes', async (req, res) => {
 app.put('/api/notes/:id', async (req, res) => {
   try {
     const noteId = req.params.id;
-    const { Title, Content, Author, color } = req.body;
-    
-    const updateData = {};
-    if (Title !== undefined) updateData.Title = Title;
-    if (Content !== undefined) updateData.Content = Content;
-    if (Author !== undefined) updateData.Author = Author;
-    if (color !== undefined) updateData.color = color;
-    
+    const updateData = req.body;
     await db.collection('notes').doc(noteId).update(updateData);
-    
     res.status(200).send({ message: 'Note updated successfully' });
   } catch (error) {
     console.error('Error updating note:', error);
@@ -84,7 +72,6 @@ app.delete('/api/notes/:id', async (req, res) => {
   try {
     const noteId = req.params.id;
     await db.collection('notes').doc(noteId).delete();
-    
     res.status(200).send({ message: 'Note deleted successfully' });
   } catch (error) {
     console.error('Error deleting note:', error);
@@ -97,5 +84,5 @@ app.get('/api/status', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
